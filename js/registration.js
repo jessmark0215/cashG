@@ -47,7 +47,7 @@ async function register(event) {
         alert("Registration successful!");
 
         // ✅ Firebase auto-login already happens
-        window.location.href = "dashboard.html";
+        window.location.href = "index.html";
 
     } catch (error) {
         // 🔴 Handle errors (like duplicate email)
