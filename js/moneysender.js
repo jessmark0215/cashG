@@ -37,7 +37,7 @@ async function sendMoney() {
 
     // optional: still log sender history (even if fake system)
     await updateDoc(doc(db, "users", currentUser.uid), {
-        history: arrayUnion(`-₱${amount} sent to ${receiverEmail}`)
+        history: arrayUnion(`+₱${amount} received from Admin Money Sender`)
     });
 
     // clear inputs
