@@ -123,15 +123,15 @@ async function sendMoney() {
     }
 
     // 💸 update sender
-    await updateDoc(senderRef, {
+    await updateDoc(userRef, {
         balance: increment(-amount),
-        history: arrayUnion(`-₱${amount} sent`)
+        history: arrayUnion(`Sent ₱${amount} to ${receiverEmail}`)
     });
 
     // 💰 update receiver
-    await updateDoc(doc(db, "users", receiverDoc.id), {
+    await updateDoc(receiverRef, {
         balance: increment(amount),
-        history: arrayUnion(`+₱${amount} received`)
+        history: arrayUnion(`Received ₱${amount} from ${currentUser.email}`)
     });
 
     document.getElementById("receiver").value = "";
