@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Admin Panel</h1>
+
+    <button onclick="showUsers()">View Users</button>
+    <!-- <button onclick="showAddUser()">Add User</button> -->
+    <button onclick="showLogs()">Login Logs</button>
+    <button onclick="logout()">Logout</button>
+
+    <!-- USERS LIST -->
+    <div id="usersBox" class="box"></div>
+
+    <!-- ADD USER -->
+    <div id="addUserBox" class="box hidden">
+        <h3>Add User</h3>
+        <input id="fullName" placeholder="Full Name">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+        <button onclick="addUser()">Create User</button>
+    </div>
+
+    <!-- LOGS -->
+    <div id="logsBox" class="box hidden"></div>
+
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

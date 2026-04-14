@@ -1,0 +1,51 @@
+body {
+    font-family: Arial;
+    background: #f4f6ff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 600px;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    border: none;
+    background: #1200b1;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #1200b1;
+}
+
+.box {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.hidden {
+    display: none;
+}
+
+.user-card {
+    background: #eef2ff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+}
+
+.delete-btn {
+    background: red;
+    float: right;
+}

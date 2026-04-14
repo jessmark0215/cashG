@@ -1,0 +1,126 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1200b1, #1200b1);
+}
+
+/* CARD */
+.login-container {
+    background: #fff;
+    width: 600px;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+    transition: 0.3s;
+}
+
+/* LOGO */
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1200b1;
+    margin-bottom: 5px;
+}
+
+.logo img{
+    width: 30%;
+}
+
+/* SUBTEXT */
+.subtext {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+/* INPUT */
+.input-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #555;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 11px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #1200b1;
+    box-shadow: 0 0 8px rgba(79, 172, 254, 0.4);
+}
+
+/* BUTTON */
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #1200b1;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    background: #00c6ff;
+    transform: translateY(-2px);
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+/* LINKS */
+.links {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.links a {
+    color: #1200b1;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.admin-btn {
+    width: 30%;
+    padding: 12px;
+    margin-top: 10px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.admin-btn:hover {
+    background: #000;
+    transform: scale(1.02);
+}   

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyWallet - Login</title>
+
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-container">
+
+    <div class="logo"><img src="images/logo.png" alt="logo"></div>
+    <h2>Welcome</h2>
+    <p class="subtext">Login to your account</p>
+
+    <form onsubmit="login(event)">
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="Enter email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+
+    </form>
+
+    <div class="links">
+        <a href="forgotpassword.html">Forgot Password?</a>
+        <br>
+        <span>Don't have an account? <a href="registration.html">Register</a></span>
+    </div>
+</div>
+
+
+
+<script type="module" src="js/login.js"></script>
+</body>
+</html>

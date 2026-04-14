@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - MyWallet</title>
+
+<link rel="stylesheet" href="css/registration.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Create Account</h2>
+
+    <form onsubmit="register(event)">
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        
+        <div class="password-box">
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+
+        <div class="input-group">
+    <label>Security Question</label>
+    <p><b>What is your pet’s name?</b></p>
+    <input type="text" id="securityAnswer" placeholder="Enter your answer" required>
+</div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p class="link">
+        Already have an account? 
+        <a href="index.html">Login</a>
+    </p>
+</div>
+
+<script type="module" src="js/registration.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e9efff, #f3f4f8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* CARD CONTAINER */
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    width: 340px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+/* TITLE */
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 22px;
+}
+
+/* INPUT FIELDS */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #1200b1;
+    box-shadow: 0 0 5px rgba(45, 108, 223, 0.3);
+}
+
+/* DEFAULT BUTTON STYLE (for all buttons except send-btn) */
+button {
+    width: 100%;
+    padding: 12px;
+    background: #1200b1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #1200b1;
+    transform: translateY(-1px);
+}
+
+/* SPECIAL SEND BUTTON (OVERRIDES DEFAULT) */
+.send-btn {
+    background: #4CAF50 !important;
+}
+
+.send-btn:hover {
+    background: #45a049 !important;
+    transform: scale(1.05);
+}
+
+.send-btn:active {
+    transform: scale(0.98);
+}
+
+/* BACK LINK */
+.back {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.back a {
+    text-decoration: none;
+    color: #1200b1;
+}
+
+.back a:hover {
+    text-decoration: underline;
+}
