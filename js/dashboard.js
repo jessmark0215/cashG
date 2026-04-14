@@ -1,21 +1,19 @@
 import { auth, db } from "./firebase.js";
-import { 
+import {
     doc, getDoc, updateDoc, increment, arrayUnion,
     collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null;
 
-// 🔒 FINAL AUTH GATE (FIXED)
+// 🔒 AUTH GATE
 auth.onAuthStateChanged(async (user) => {
     if (!user) {
         window.location.href = "index.html";
         return;
     }
 
-    // 🔐 must pass authenticate page
     let authDone = localStorage.getItem("authDone");
-
     if (authDone !== "true") {
         window.location.href = "authenticate.html";
         return;
@@ -102,7 +100,7 @@ async function sendMoney() {
         return;
     }
 
-    // 🔍 find receiver
+    // find receiver
     const q = query(collection(db, "users"), where("email", "==", receiverEmail));
     const querySnapshot = await getDocs(q);
 
@@ -113,7 +111,7 @@ async function sendMoney() {
 
     const receiverDoc = querySnapshot.docs[0];
 
-    // 🔍 sender data
+    // sender data
     const senderRef = doc(db, "users", currentUser.uid);
     const senderSnap = await getDoc(senderRef);
 
@@ -124,16 +122,16 @@ async function sendMoney() {
         return;
     }
 
-    // 💸 sender update
+    // 💸 update sender
     await updateDoc(senderRef, {
         balance: increment(-amount),
-        history: arrayUnion(`-₱${amount} sent to ${receiverEmail}`)
+        history: arrayUnion(`-₱${amount} sent`)
     });
 
-    // 💰 receiver update
+    // 💰 update receiver
     await updateDoc(doc(db, "users", receiverDoc.id), {
         balance: increment(amount),
-        history: arrayUnion(`+₱${amount} received from ${currentUser.email}`)
+        history: arrayUnion(`+₱${amount} received`)
     });
 
     document.getElementById("receiver").value = "";
@@ -152,7 +150,7 @@ function logout() {
     });
 }
 
-// expose functions to HTML
+// expose functions
 window.showAdd = showAdd;
 window.showSend = showSend;
 window.addMoney = addMoney;
