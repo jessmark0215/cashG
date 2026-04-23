@@ -18,14 +18,15 @@ async function resetPassword(event) {
     const answer = document.getElementById("answer").value.trim().toLowerCase();
     const newPassword = document.getElementById("newPassword").value.trim();
 
+    // 🔐 Password validation
     const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!strong.test(newPassword)) {
-        alert("Weak password.");
+        alert("Password must be at least 8 characters and include uppercase, lowercase, and a number.");
         return;
     }
 
     try {
-        // 🔍 find user
+        // 🔍 Find user in Firestore
         const q = query(collection(db, "users"), where("email", "==", email));
         const snapshot = await getDocs(q);
 
@@ -38,40 +39,47 @@ async function resetPassword(event) {
         const userData = userDoc.data();
         const userRef = doc(db, "users", userDoc.id);
 
-        // 🚫 check attempts (max 3)
-        if (userData.attempts >= 3) {
+        // 🔢 Ensure attempts exists
+        const attempts = userData.attempts || 0;
+
+        // 🚫 Max 3 attempts
+        if (attempts >= 3) {
             alert("Too many attempts. Try again later.");
             return;
         }
 
-        // ❌ wrong answer
+        // ❌ Wrong answer
         if (userData.securityAnswer !== answer) {
             await updateDoc(userRef, {
                 attempts: increment(1)
             });
-            alert("Incorrect answer.");
+            alert("Incorrect security answer.");
             return;
         }
 
-        // ✅ reset attempts after success
+        // ✅ Reset attempts on success
         await updateDoc(userRef, {
             attempts: 0
         });
 
-        // 🔐 sign in using stored password
+        // 🔐 Sign in using stored password
         await signInWithEmailAndPassword(auth, email, userData.password);
 
-        // 🔄 update password
+        // 🔄 Update password
         await updatePassword(auth.currentUser, newPassword);
 
-        // 🔒 sign out after reset
+        // 🔒 Sign out after reset
         await signOut(auth);
 
-        alert("Password successfully reset!");
-        window.location.href = "index.html";
+        // ✅ SUCCESS MESSAGE + DELAY
+        alert("Password reset successful!");
+
+        setTimeout(() => {
+            window.location.href = "index.html"; // login page
+        }, 1200);
 
     } catch (error) {
-        console.error(error);
+        console.error("RESET ERROR:", error);
         alert("Error: " + error.message);
     }
 }
