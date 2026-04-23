@@ -1,15 +1,13 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
-    collection, query, where, getDocs,
-    updateDoc, doc, increment
+    collection,
+    query,
+    where,
+    getDocs,
+    updateDoc,
+    doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-import {
-    signInWithEmailAndPassword,
-    updatePassword,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 async function resetPassword(event) {
     event.preventDefault();
@@ -18,7 +16,7 @@ async function resetPassword(event) {
     const answer = document.getElementById("securityAnswer").value.trim().toLowerCase();
     const newPassword = document.getElementById("newPassword").value.trim();
 
-    // 🔐 Password validation
+    // 🔐 Password strength check
     const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!strong.test(newPassword)) {
         alert("Password must be at least 8 characters and include uppercase, lowercase, and a number.");
@@ -26,63 +24,35 @@ async function resetPassword(event) {
     }
 
     try {
-        // 🔍 STEP 1: find user by email
+        // 🔍 Find user in Firestore by email
         const q = query(collection(db, "users"), where("email", "==", email));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            alert("No account found.");
+            alert("No account found with this email!");
             return;
         }
 
-        const userDocFromQuery = snapshot.docs[0];
-        const userData = userDocFromQuery.data();
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
 
-        // ✅ IMPORTANT: get UID (same as login.js)
-        const uid = userDocFromQuery.id;
-
-        // 🎯 now match login.js structure
-        const userRef = doc(db, "users", uid);
-
-        // 🔢 attempts safe fallback
-        const attempts = userData.attempts || 0;
-
-        if (attempts >= 3) {
-            alert("Too many attempts. Try again later.");
-            return;
-        }
-
-        // ❌ wrong answer
+        // 🔴 Check security answer
         if (userData.securityAnswer !== answer) {
-            await updateDoc(userRef, {
-                attempts: increment(1)
-            });
-            alert("Incorrect security answer.");
+            alert("Incorrect security answer!");
             return;
         }
 
-        // ✅ reset attempts
-        await updateDoc(userRef, {
-            attempts: 0
+        // 🔄 Update password in Firestore
+        await updateDoc(doc(db, "users", userDoc.id), {
+            password: btoa(newPassword) // keeping your old "hashing style"
         });
-
-        // 🔐 sign in (must match how you stored password)
-        await signInWithEmailAndPassword(auth, email, userData.password);
-
-        // 🔄 update password
-        await updatePassword(auth.currentUser, newPassword);
-
-        // 🔒 sign out
-        await signOut(auth);
 
         alert("Password reset successful!");
 
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 1200);
+        window.location.href = "index.html";
 
     } catch (error) {
-        console.error("RESET ERROR:", error);
+        console.error(error);
         alert("Error: " + error.message);
     }
 }
