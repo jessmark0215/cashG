@@ -1,8 +1,12 @@
-import { auth, db } from "./firebase.js";
-import { signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, collection, addDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from "./firebase.js";
+
+import {
+    collection,
+    query,
+    where,
+    getDocs,
+    addDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 async function login(event) {
     event.preventDefault();
@@ -10,7 +14,6 @@ async function login(event) {
     let email = document.getElementById("email").value.trim();
     let password = document.getElementById("password").value.trim();
 
-    // 🔒 login attempts (local only)
     let attemptsData = JSON.parse(localStorage.getItem("loginAttempts_" + email)) || {
         attempts: 0,
         lockTime: 0
@@ -25,47 +28,48 @@ async function login(event) {
     }
 
     try {
-        // 🔐 Firebase login
-        await signInWithEmailAndPassword(auth, email, password);
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const snapshot = await getDocs(q);
 
-        // reset attempts
+        if (snapshot.empty) {
+            throw new Error("No account found!");
+        }
+
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
+
+        if (userData.password !== password) {
+            throw new Error("Incorrect email or password!");
+        }
+
         localStorage.removeItem("loginAttempts_" + email);
 
-        // 📌 log login
         await addDoc(collection(db, "loginLogs"), {
-            email: email,
+            email,
             status: "SUCCESS LOGIN",
             time: new Date().toLocaleString()
         });
 
-        // 🔍 GET USER ROLE FROM FIRESTORE
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        const userSnap = await getDoc(userRef);
+        // 🔥 FIXED SESSION SYSTEM
+        localStorage.setItem("currentUserEmail", email);
+        localStorage.setItem("authVerified", "false");
 
-        let role = "user"; // default role
-
-        if (userSnap.exists()) {
-            role = userSnap.data().role || "user";
-        }
-
-        // 💾 store role safely
+        let role = userData.role || "user";
         localStorage.setItem("userRole", role);
 
-        // 👑 ADMIN FLOW (SKIP AUTH)
         if (role === "admin") {
             alert("Admin login successful!");
             window.location.href = "admin.html";
             return;
         }
 
-        // 👤 USER FLOW (GO AUTH PAGE)
-        localStorage.setItem("pendingAuth", email);
-
         alert("Login successful! Proceeding to security verification...");
-        window.location.href = "authenticate.html";
+
+        setTimeout(() => {
+            window.location.href = "authenticate.html";
+        }, 100);
 
     } catch (error) {
-        // ❌ FAILED LOGIN
         attemptsData.attempts++;
 
         if (attemptsData.attempts < 3) {
@@ -75,7 +79,6 @@ async function login(event) {
         if (attemptsData.attempts >= 3) {
             attemptsData.lockTime = now + 30000;
             attemptsData.attempts = 0;
-
             alert("Account locked for 30 seconds due to multiple failed attempts.");
         }
 
@@ -83,10 +86,4 @@ async function login(event) {
     }
 }
 
-// ===================== ADMIN BUTTON =====================
-function goAdmin() {
-    window.location.href = "admin.html";
-}
-
 window.login = login;
-window.goAdmin = goAdmin; 

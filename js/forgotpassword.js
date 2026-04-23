@@ -9,6 +9,16 @@ import {
     doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+function isStrongPassword(password) {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+}
+
+// ✅ attach event
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("resetForm");
+    if (form) form.addEventListener("submit", resetPassword);
+});
+
 async function resetPassword(event) {
     event.preventDefault();
 
@@ -16,15 +26,18 @@ async function resetPassword(event) {
     const answer = document.getElementById("securityAnswer").value.trim().toLowerCase();
     const newPassword = document.getElementById("newPassword").value.trim();
 
-    // 🔐 Password strength check
-    const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!strong.test(newPassword)) {
+    if (!email || !answer || !newPassword) {
+        alert("Please fill in all fields!");
+        return;
+    }
+
+    if (!isStrongPassword(newPassword)) {
         alert("Password must be at least 8 characters and include uppercase, lowercase, and a number.");
         return;
     }
 
     try {
-        // 🔍 Find user in Firestore by email
+        // 🔍 find user by email (same as register.js structure)
         const q = query(collection(db, "users"), where("email", "==", email));
         const snapshot = await getDocs(q);
 
@@ -36,15 +49,15 @@ async function resetPassword(event) {
         const userDoc = snapshot.docs[0];
         const userData = userDoc.data();
 
-        // 🔴 Check security answer
+        // 🔴 check security answer
         if (userData.securityAnswer !== answer) {
             alert("Incorrect security answer!");
             return;
         }
 
-        // 🔄 Update password in Firestore
+        // 🔄 update password directly in Firestore (same style as register.js)
         await updateDoc(doc(db, "users", userDoc.id), {
-            password: btoa(newPassword) // keeping your old "hashing style"
+            password: newPassword   // same storage style as registration
         });
 
         alert("Password reset successful!");
@@ -52,8 +65,8 @@ async function resetPassword(event) {
         window.location.href = "index.html";
 
     } catch (error) {
-        console.error(error);
-        alert("Error: " + error.message);
+        console.error("RESET ERROR:", error);
+        alert(error.message);
     }
 }
 

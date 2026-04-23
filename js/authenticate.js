@@ -1,11 +1,17 @@
-import { auth, db } from "./firebase.js";
-import { doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from "./firebase.js";
 
-async function verifySecurity() {
-    let answer = document.getElementById("answer").value.trim().toLowerCase();
+import {
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    let email = localStorage.getItem("pendingAuth");
+async function verifySecurity(event) {
+    if (event) event.preventDefault();
+
+    const answer = document.getElementById("answer").value.trim().toLowerCase();
+    const email = localStorage.getItem("currentUserEmail");
 
     if (!email) {
         alert("Session expired. Please login again.");
@@ -14,40 +20,29 @@ async function verifySecurity() {
     }
 
     try {
-        // 🔐 get current user from Firebase Auth
-        const user = auth.currentUser;
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const snapshot = await getDocs(q);
 
-        if (!user) {
-            alert("Authentication lost. Please login again.");
+        if (snapshot.empty) {
+            alert("User not found!");
             window.location.href = "index.html";
             return;
         }
 
-        // 🔍 get user data from Firestore
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        const userData = snapshot.docs[0].data();
 
-        if (!docSnap.exists()) {
-            alert("User not found!");
-            window.location.href = "login.html";
-            return;
-        }
-
-        let userData = docSnap.data();
-
-        // 🔴 check security answer
         if (userData.securityAnswer !== answer) {
             alert("Incorrect answer!");
             return;
         }
 
-        // 🔐 SUCCESS STEP (CRITICAL FIX)
-        localStorage.setItem("authDone", "true");
-        localStorage.removeItem("pendingAuth");
+        localStorage.setItem("authVerified", "true");
 
         alert("Verification successful!");
 
-        window.location.href = "dashboard.html";
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 120);
 
     } catch (error) {
         console.error(error);
@@ -55,5 +50,4 @@ async function verifySecurity() {
     }
 }
 
-// expose function to HTML
 window.verifySecurity = verifySecurity;

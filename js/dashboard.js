@@ -1,41 +1,51 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+
 import {
-    doc, getDoc, updateDoc, increment, arrayUnion,
-    collection, query, where, getDocs
+    doc,
+    updateDoc,
+    increment,
+    arrayUnion,
+    collection,
+    query,
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null;
 
-// 🔒 AUTH GATE
-auth.onAuthStateChanged(async (user) => {
-    if (!user) {
+window.addEventListener("DOMContentLoaded", async () => {
+
+    const email = localStorage.getItem("currentUserEmail");
+    const authVerified = localStorage.getItem("authVerified");
+
+    if (!email || authVerified !== "true") {
         window.location.href = "index.html";
         return;
     }
 
-    let authDone = localStorage.getItem("authDone");
-    if (authDone !== "true") {
-        window.location.href = "authenticate.html";
-        return;
-    }
+    try {
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const snapshot = await getDocs(q);
 
-    currentUser = user;
-    loadUserData();
+        if (snapshot.empty) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        currentUser = snapshot.docs[0];
+
+        loadUserData();
+
+    } catch (error) {
+        console.error(error);
+        window.location.href = "index.html";
+    }
 });
 
-// ========== LOAD USER DATA ==========
 async function loadUserData() {
     if (!currentUser) return;
 
-    const docRef = doc(db, "users", currentUser.uid);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists()) {
-        alert("User data not found!");
-        return;
-    }
-
-    let data = docSnap.data();
+    const data = currentUser.data();
 
     document.getElementById("userFullName").innerText =
         "Welcome Bossing! " + (data.name || data.email);
@@ -46,7 +56,7 @@ async function loadUserData() {
     let historyDiv = document.getElementById("history");
     historyDiv.innerHTML = "";
 
-    if (!data.history || data.history.length === 0) {
+    if (!data.history?.length) {
         historyDiv.innerHTML = "<p>No transactions yet</p>";
         return;
     }
@@ -59,100 +69,63 @@ async function loadUserData() {
     });
 }
 
-// ========== UI TOGGLES ==========
-function showAdd() {
-    document.getElementById("addBox").style.display = "block";
-    document.getElementById("sendBox").style.display = "none";
-}
-
-function showSend() {
-    document.getElementById("sendBox").style.display = "block";
-    document.getElementById("addBox").style.display = "none";
-}
-
-// ========== ADD MONEY ==========
+// ===== FIXED MONEY FUNCTIONS =====
 async function addMoney() {
     let amount = Number(document.getElementById("addAmount").value);
 
-    if (amount <= 0 || isNaN(amount)) {
-        alert("Enter valid amount!");
-        return;
-    }
+    if (amount <= 0 || isNaN(amount)) return alert("Invalid amount");
 
-    await updateDoc(doc(db, "users", currentUser.uid), {
+    await updateDoc(doc(db, "users", currentUser.id), {
         balance: increment(amount),
         history: arrayUnion(`+₱${amount} added to wallet`)
     });
 
-    document.getElementById("addAmount").value = "";
     loadUserData();
-
-    alert("Money added successfully!");
+    alert("Money added!");
 }
 
-// ========== SEND MONEY ==========
 async function sendMoney() {
     let receiverEmail = document.getElementById("receiver").value.trim();
     let amount = Number(document.getElementById("sendAmount").value);
 
-    if (amount <= 0 || isNaN(amount)) {
-        alert("Enter valid amount!");
-        return;
-    }
+    if (amount <= 0 || isNaN(amount)) return alert("Invalid amount");
 
-    // find receiver
     const q = query(collection(db, "users"), where("email", "==", receiverEmail));
-    const querySnapshot = await getDocs(q);
+    const snapshot = await getDocs(q);
 
-    if (querySnapshot.empty) {
-        alert("Receiver not found!");
-        return;
-    }
+    if (snapshot.empty) return alert("Receiver not found");
 
-    const receiverDoc = querySnapshot.docs[0];
+    const receiverDoc = snapshot.docs[0];
 
-    // sender data
-    const senderRef = doc(db, "users", currentUser.uid);
-    const senderSnap = await getDoc(senderRef);
-
-    let senderData = senderSnap.data();
+    const senderData = currentUser.data();
 
     if ((senderData.balance || 0) < amount) {
-        alert("Insufficient balance!");
-        return;
+        return alert("Insufficient balance");
     }
 
-    // 💸 update sender
-    await updateDoc(senderRef, {
+    await updateDoc(doc(db, "users", currentUser.id), {
         balance: increment(-amount),
         history: arrayUnion(`-₱${amount} sent to ${receiverEmail}`)
     });
 
-    // 💰 update receiver
     await updateDoc(doc(db, "users", receiverDoc.id), {
         balance: increment(amount),
-        history: arrayUnion(`+₱${amount} received from ${currentUser.email}`)
+        history: arrayUnion(`+₱${amount} received from ${senderData.email}`)
     });
-
-    document.getElementById("receiver").value = "";
-    document.getElementById("sendAmount").value = "";
 
     loadUserData();
-    alert("Money sent successfully!");
+    alert("Sent successfully");
 }
 
-// ========== LOGOUT ==========
 function logout() {
-    localStorage.removeItem("authDone");
+    localStorage.removeItem("currentUserEmail");
+    localStorage.removeItem("authVerified");
 
-    auth.signOut().then(() => {
-        window.location.href = "index.html";
-    });
+    window.location.href = "index.html";
 }
 
-// expose functions
-window.showAdd = showAdd;
-window.showSend = showSend;
+window.showAdd = () => document.getElementById("addBox").style.display = "block";
+window.showSend = () => document.getElementById("sendBox").style.display = "block";
 window.addMoney = addMoney;
 window.sendMoney = sendMoney;
 window.logout = logout;
