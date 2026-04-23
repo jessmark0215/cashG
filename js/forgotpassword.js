@@ -26,7 +26,7 @@ async function resetPassword(event) {
     }
 
     try {
-        // 🔍 Find user in Firestore
+        // 🔍 STEP 1: find user by email
         const q = query(collection(db, "users"), where("email", "==", email));
         const snapshot = await getDocs(q);
 
@@ -35,20 +35,24 @@ async function resetPassword(event) {
             return;
         }
 
-        const userDoc = snapshot.docs[0];
-        const userData = userDoc.data();
-        const userRef = doc(db, "users", userDoc.id);
+        const userDocFromQuery = snapshot.docs[0];
+        const userData = userDocFromQuery.data();
 
-        // 🔢 Ensure attempts exists
+        // ✅ IMPORTANT: get UID (same as login.js)
+        const uid = userDocFromQuery.id;
+
+        // 🎯 now match login.js structure
+        const userRef = doc(db, "users", uid);
+
+        // 🔢 attempts safe fallback
         const attempts = userData.attempts || 0;
 
-        // 🚫 Max 3 attempts
         if (attempts >= 3) {
             alert("Too many attempts. Try again later.");
             return;
         }
 
-        // ❌ Wrong answer
+        // ❌ wrong answer
         if (userData.securityAnswer !== answer) {
             await updateDoc(userRef, {
                 attempts: increment(1)
@@ -57,25 +61,24 @@ async function resetPassword(event) {
             return;
         }
 
-        // ✅ Reset attempts on success
+        // ✅ reset attempts
         await updateDoc(userRef, {
             attempts: 0
         });
 
-        // 🔐 Sign in using stored password
+        // 🔐 sign in (must match how you stored password)
         await signInWithEmailAndPassword(auth, email, userData.password);
 
-        // 🔄 Update password
+        // 🔄 update password
         await updatePassword(auth.currentUser, newPassword);
 
-        // 🔒 Sign out after reset
+        // 🔒 sign out
         await signOut(auth);
 
-        // ✅ SUCCESS MESSAGE + DELAY
         alert("Password reset successful!");
 
         setTimeout(() => {
-            window.location.href = "index.html"; // login page
+            window.location.href = "index.html";
         }, 1200);
 
     } catch (error) {
@@ -83,3 +86,5 @@ async function resetPassword(event) {
         alert("Error: " + error.message);
     }
 }
+
+window.resetPassword = resetPassword;
