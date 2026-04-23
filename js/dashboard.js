@@ -38,7 +38,7 @@ async function loadUserData() {
     let data = docSnap.data();
 
     document.getElementById("userFullName").innerText =
-        "Welcome, " + (data.name || data.email);
+        "Welcome Bossing! " + (data.name || data.email);
 
     document.getElementById("balance").innerText =
         "₱" + (data.balance || 0);
