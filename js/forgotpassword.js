@@ -15,7 +15,7 @@ async function resetPassword(event) {
     event.preventDefault();
 
     const email = document.getElementById("email").value.trim();
-    const answer = document.getElementById("answer").value.trim().toLowerCase();
+    const answer = document.getElementById("securityAnswer").value.trim().toLowerCase();
     const newPassword = document.getElementById("newPassword").value.trim();
 
     // 🔐 Password validation
