@@ -88,5 +88,3 @@ async function resetPassword(event) {
 }
 
 window.resetPassword = resetPassword;
-
-window.resetPassword = resetPassword;
